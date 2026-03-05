@@ -39,6 +39,72 @@ var stdinCmd = &cobra.Command{
 	},
 }
 
+var followCmd = &cobra.Command{
+	Use:   "follow",
+	Short: "Follow one or more log files (like tail -f)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := configFromFlags(cmd)
+
+		files, _ := cmd.Flags().GetStringSlice("file")
+		cfg.FilePaths = files
+
+		src := source.NewFileSource(files)
+
+		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer cancel()
+
+		application, err := app.New(cfg, src)
+		if err != nil {
+			return err
+		}
+		return application.Run(ctx)
+	},
+}
+
+var socketCmd = &cobra.Command{
+	Use:   "socket",
+	Short: "Accept log lines over TCP",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := configFromFlags(cmd)
+
+		addr := getStringFlag(cmd, "listen", "INTERLOKI_SOCKET_ADDR", cfg.SocketAddr)
+		cfg.SocketAddr = addr
+
+		src := source.NewSocketSource(addr)
+
+		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer cancel()
+
+		application, err := app.New(cfg, src)
+		if err != nil {
+			return err
+		}
+		return application.Run(ctx)
+	},
+}
+
+var demoCmd = &cobra.Command{
+	Use:   "demo",
+	Short: "Generate fake log messages for demonstration",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := configFromFlags(cmd)
+
+		rate := getIntFlag(cmd, "rate", "INTERLOKI_DEMO_RATE", cfg.DemoRate)
+		cfg.DemoRate = rate
+
+		src := source.NewDemoSource(rate)
+
+		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer cancel()
+
+		application, err := app.New(cfg, src)
+		if err != nil {
+			return err
+		}
+		return application.Run(ctx)
+	},
+}
+
 func init() {
 	// Persistent flags on root command.
 	rootCmd.PersistentFlags().Int("port", 8080, "HTTP server port")
@@ -47,7 +113,17 @@ func init() {
 	rootCmd.PersistentFlags().Int("bulk-window-ms", 100, "WebSocket flush interval in milliseconds")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Enable verbose (debug) logging")
 
-	rootCmd.AddCommand(stdinCmd)
+	// follow command flags.
+	followCmd.Flags().StringSlice("file", nil, "File paths to follow (can be repeated)")
+	followCmd.MarkFlagRequired("file")
+
+	// socket command flags.
+	socketCmd.Flags().String("listen", ":9999", "TCP address to listen on")
+
+	// demo command flags.
+	demoCmd.Flags().Int("rate", 10, "Messages per second")
+
+	rootCmd.AddCommand(stdinCmd, followCmd, socketCmd, demoCmd)
 }
 
 // configFromFlags builds a Config from cobra command flags with env var fallback.
