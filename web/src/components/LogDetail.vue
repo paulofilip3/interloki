@@ -24,12 +24,17 @@ defineEmits<{
   close: []
 }>()
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const highlightedJson = computed(() => {
   if (!props.message?.is_json || !props.message.json_content) return ''
   try {
     const raw = JSON.stringify(props.message.json_content, null, 2)
-    return raw.replace(
-      /("(?:[^"\\]|\\.)*")(\s*:)?|(\b(?:true|false|null)\b)|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+    const escaped = escapeHtml(raw)
+    return escaped.replace(
+      /(&quot;(?:[^&]|&(?!quot;))*&quot;)(\s*:)?|(\b(?:true|false|null)\b)|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
       (_match: string, str?: string, colon?: string, bool?: string, num?: string) => {
         if (str) {
           if (colon) {

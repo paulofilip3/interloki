@@ -64,7 +64,8 @@ type Client struct {
 	manager *ClientManager
 	send    chan models.LogMessage
 	status  string
-	mu      sync.Mutex
+	mu      sync.Mutex // guards status
+	writeMu sync.Mutex // guards WebSocket writes
 }
 
 func newClient(id string, conn *websocket.Conn, manager *ClientManager) *Client {
@@ -167,7 +168,9 @@ func (c *Client) writePump() {
 		case msg, ok := <-c.send:
 			if !ok {
 				// Channel closed — manager removed us.
+				c.writeMu.Lock()
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.writeMu.Unlock()
 				return
 			}
 			batch = append(batch, msg)
@@ -179,8 +182,11 @@ func (c *Client) writePump() {
 			}
 
 		case <-pingTicker.C:
+			c.writeMu.Lock()
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			err := c.conn.WriteMessage(websocket.PingMessage, nil)
+			c.writeMu.Unlock()
+			if err != nil {
 				return
 			}
 		}
@@ -200,8 +206,10 @@ func (c *Client) writeLogBulk(messages []models.LogMessage) {
 	})
 }
 
-// writeJSON sends a JSON message to the WebSocket. Thread-safe via write deadline.
+// writeJSON sends a JSON message to the WebSocket. Thread-safe via writeMu.
 func (c *Client) writeJSON(msg wsMessage) error {
+	c.writeMu.Lock()
+	defer c.writeMu.Unlock()
 	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.conn.WriteJSON(msg)
 }

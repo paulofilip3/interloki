@@ -311,7 +311,7 @@ func MarshalGzip(msgs []models.LogMessage) ([]byte, error) {
 }
 
 // UnmarshalGzip decompresses gzipped data from r and parses a JSON array of
-// LogMessage.
+// LogMessage. Decompressed data is limited to 50 MB to prevent memory exhaustion.
 func UnmarshalGzip(r io.Reader) ([]models.LogMessage, error) {
 	gz, err := gzip.NewReader(r)
 	if err != nil {
@@ -319,9 +319,13 @@ func UnmarshalGzip(r io.Reader) ([]models.LogMessage, error) {
 	}
 	defer gz.Close()
 
-	data, err := io.ReadAll(gz)
+	const maxDecompressed = 50 << 20 // 50 MB
+	data, err := io.ReadAll(io.LimitReader(gz, maxDecompressed+1))
 	if err != nil {
 		return nil, fmt.Errorf("reading gzip: %w", err)
+	}
+	if len(data) > maxDecompressed {
+		return nil, fmt.Errorf("decompressed chunk exceeds %d bytes limit", maxDecompressed)
 	}
 
 	var msgs []models.LogMessage

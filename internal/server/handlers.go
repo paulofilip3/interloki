@@ -22,6 +22,9 @@ func (m *ClientManager) HandleLoadRange(w http.ResponseWriter, r *http.Request) 
 	if count <= 0 {
 		count = 100
 	}
+	if count > 1000 {
+		count = 1000
+	}
 
 	messages := m.ring.GetRange(start, count)
 	w.Header().Set("Content-Type", "application/json")

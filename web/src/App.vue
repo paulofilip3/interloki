@@ -12,7 +12,8 @@ import type { LogMessage } from './types'
 
 useTheme()
 
-const wsUrl = `ws://${window.location.host}/ws`
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+const wsUrl = `${wsProtocol}//${window.location.host}/ws`
 const { connect } = useWebSocket(wsUrl)
 
 const selectedMessage = ref<LogMessage | null>(null)
