@@ -12,6 +12,7 @@ vendor/
 # Web / Node
 web/node_modules/
 web/dist/
+web/dist-wc/
 
 # Embedded frontend (build artifact copied from web/dist)
 internal/server/dist/*

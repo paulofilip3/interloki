@@ -1,11 +1,21 @@
 {
-  "name": "interloki-web",
+  "name": "@interloki/viewer",
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "main": "./dist-wc/interloki-viewer.umd.cjs",
+  "module": "./dist-wc/interloki-viewer.js",
+  "types": "./dist-wc/interloki-viewer.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist-wc/interloki-viewer.js",
+      "require": "./dist-wc/interloki-viewer.umd.cjs"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+    "build:wc": "vue-tsc --noEmit && BUILD_WC=true vite build",
     "preview": "vite preview"
   },
   "dependencies": {
