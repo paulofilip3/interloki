@@ -4,7 +4,7 @@ export interface LogMessage {
   json_content?: unknown
   is_json: boolean
   ts: string // ISO timestamp
-  source: 'loki' | 'stdin' | 'file' | 'socket' | 'demo'
+  source: 'loki' | 'stdin' | 'file' | 'socket' | 'demo' | 'forward'
   origin: Origin
   labels?: Record<string, string>
   level?: string

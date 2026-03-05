@@ -70,13 +70,35 @@ export const useConnectionStore = defineStore('connection', () => {
 
     logsStore.isLoadingHistory = true
     try {
-      const start = Math.max(0, logsStore.oldestLoadedIndex - WINDOW_SIZE)
-      const count = logsStore.oldestLoadedIndex - start
-      if (count <= 0) return
+      if (logsStore.oldestLoadedIndex > 0) {
+        // Load from ring buffer
+        const start = Math.max(0, logsStore.oldestLoadedIndex - WINDOW_SIZE)
+        const count = logsStore.oldestLoadedIndex - start
+        if (count <= 0) return
 
-      const res = await fetch(`/api/client/load?start=${start}&count=${count}`)
-      const data = await res.json() as { messages: LogMessage[]; total: number }
-      logsStore.prependHistory(data.messages, start)
+        const res = await fetch(`/api/client/load?start=${start}&count=${count}`)
+        const data = await res.json() as { messages: LogMessage[]; total: number }
+        logsStore.prependHistory(data.messages, start)
+      } else if (logsStore.s3HasMore) {
+        // Ring buffer exhausted — fall back to S3 history
+        const before = logsStore.oldestTimestamp
+        if (!before) return
+
+        const res = await fetch(`/api/history?before=${encodeURIComponent(before)}&count=${WINDOW_SIZE}`)
+        const data = await res.json() as { messages: LogMessage[]; has_more: boolean }
+
+        if (!data.has_more) {
+          logsStore.s3HasMore = false
+        }
+
+        if (data.messages && data.messages.length > 0) {
+          // API returns newest-first; reverse so oldest is first for prepending
+          const sorted = [...data.messages].reverse()
+          logsStore.prependHistory(sorted, 0)
+        } else {
+          logsStore.s3HasMore = false
+        }
+      }
     } catch {
       // ignore
     } finally {

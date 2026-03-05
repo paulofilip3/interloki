@@ -11,8 +11,16 @@ export const useLogsStore = defineStore('logs', () => {
   const filterMode = ref<'text' | 'regex'>('text')
   const oldestLoadedIndex = ref(0)
   const isLoadingHistory = ref(false)
+  const s3HasMore = ref(true)
 
-  const canLoadMore = computed(() => oldestLoadedIndex.value > 0)
+  const oldestTimestamp = computed(() => {
+    if (messages.value.length === 0) return null
+    return messages.value[0].ts
+  })
+
+  const canLoadMore = computed(() =>
+    oldestLoadedIndex.value > 0 || s3HasMore.value
+  )
 
   const filteredMessages = computed(() => {
     if (!filter.value) return messages.value
@@ -70,6 +78,7 @@ export const useLogsStore = defineStore('logs', () => {
   function clear() {
     messages.value = []
     oldestLoadedIndex.value = 0
+    s3HasMore.value = true
   }
 
   function setFilter(text: string) {
@@ -87,6 +96,8 @@ export const useLogsStore = defineStore('logs', () => {
     filteredMessages,
     oldestLoadedIndex,
     isLoadingHistory,
+    s3HasMore,
+    oldestTimestamp,
     canLoadMore,
     addMessages,
     trimToWindow,
