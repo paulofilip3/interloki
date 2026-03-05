@@ -43,7 +43,7 @@ const levelClass = computed(() => {
       :class="levelClass"
     >{{ message.level.toUpperCase() }}</span>
     <span v-if="settings.showSource" class="log-row__source">{{ message.source }}</span>
-    <span class="log-row__content">{{ message.content }}</span>
+    <span class="log-row__content" :class="{ 'log-row__content--json': message.is_json }">{{ message.content }}</span>
   </div>
 </template>
 
@@ -97,27 +97,27 @@ const levelClass = computed(() => {
 
 .log-row__level--debug {
   color: var(--interloki-level-debug);
-  background: rgba(107, 114, 128, 0.1);
+  background: rgba(107, 114, 128, 0.15);
 }
 
 .log-row__level--info {
   color: var(--interloki-level-info);
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(37, 99, 235, 0.14);
 }
 
 .log-row__level--warn {
   color: var(--interloki-level-warn);
-  background: rgba(217, 119, 6, 0.1);
+  background: rgba(217, 119, 6, 0.14);
 }
 
 .log-row__level--error {
   color: var(--interloki-level-error);
-  background: rgba(220, 38, 38, 0.12);
+  background: rgba(220, 38, 38, 0.16);
 }
 
 .log-row__level--fatal {
   color: var(--interloki-level-fatal);
-  background: rgba(124, 45, 18, 0.12);
+  background: rgba(124, 45, 18, 0.16);
 }
 
 .log-row__source {
@@ -132,5 +132,9 @@ const levelClass = computed(() => {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.log-row__content--json {
+  color: var(--interloki-fg-secondary);
 }
 </style>
