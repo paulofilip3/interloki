@@ -14,8 +14,27 @@ type Server struct {
 	manager    *ClientManager
 }
 
+// ServerOption is a functional option for NewServer.
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	storage Storage
+}
+
+// WithStorage attaches a Storage backend for the /api/history endpoint.
+func WithStorage(s Storage) ServerOption {
+	return func(o *serverOptions) {
+		o.storage = s
+	}
+}
+
 // NewServer creates a new Server bound to the given host and port.
-func NewServer(host string, port int, manager *ClientManager) *Server {
+func NewServer(host string, port int, manager *ClientManager, opts ...ServerOption) *Server {
+	var so serverOptions
+	for _, o := range opts {
+		o(&so)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /", FrontendHandler())
@@ -23,6 +42,11 @@ func NewServer(host string, port int, manager *ClientManager) *Server {
 	mux.HandleFunc("GET /ws", manager.HandleWS)
 	mux.HandleFunc("GET /api/status", manager.HandleStatus)
 	mux.HandleFunc("GET /api/client/load", manager.HandleLoadRange)
+
+	if so.storage != nil {
+		h := &HistoryHandler{storage: so.storage}
+		mux.HandleFunc("GET /api/history", h.HandleHistory)
+	}
 
 	return &Server{
 		httpServer: &http.Server{

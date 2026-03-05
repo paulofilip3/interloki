@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -135,6 +136,14 @@ func init() {
 	rootCmd.PersistentFlags().Int("bulk-window-ms", 100, "WebSocket flush interval in milliseconds")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Enable verbose (debug) logging")
 
+	// S3 storage persistent flags.
+	rootCmd.PersistentFlags().String("s3-bucket", "", "S3 bucket for log persistence")
+	rootCmd.PersistentFlags().String("s3-prefix", "", "S3 key prefix")
+	rootCmd.PersistentFlags().String("s3-region", "", "AWS region")
+	rootCmd.PersistentFlags().String("s3-endpoint", "", "Custom S3 endpoint (MinIO, localstack)")
+	rootCmd.PersistentFlags().String("s3-flush-interval", "10s", "S3 flush interval")
+	rootCmd.PersistentFlags().Int("s3-flush-count", 1000, "S3 flush message count threshold")
+
 	// follow command flags.
 	followCmd.Flags().StringSlice("file", nil, "File paths to follow (can be repeated)")
 	followCmd.MarkFlagRequired("file")
@@ -161,6 +170,14 @@ func configFromFlags(cmd *cobra.Command) config.Config {
 	cfg.BulkWindowMS = getIntFlag(cmd, "bulk-window-ms", "INTERLOKI_BULK_WINDOW_MS", cfg.BulkWindowMS)
 	cfg.Verbose = getBoolFlag(cmd, "verbose", "INTERLOKI_VERBOSE", cfg.Verbose)
 
+	// S3 storage flags.
+	cfg.S3Bucket = getStringFlag(cmd, "s3-bucket", "INTERLOKI_S3_BUCKET", cfg.S3Bucket)
+	cfg.S3Prefix = getStringFlag(cmd, "s3-prefix", "INTERLOKI_S3_PREFIX", cfg.S3Prefix)
+	cfg.S3Region = getStringFlag(cmd, "s3-region", "INTERLOKI_S3_REGION", cfg.S3Region)
+	cfg.S3Endpoint = getStringFlag(cmd, "s3-endpoint", "INTERLOKI_S3_ENDPOINT", cfg.S3Endpoint)
+	cfg.S3FlushInterval = getDurationFlag(cmd, "s3-flush-interval", "INTERLOKI_S3_FLUSH_INTERVAL", cfg.S3FlushInterval)
+	cfg.S3FlushCount = getIntFlag(cmd, "s3-flush-count", "INTERLOKI_S3_FLUSH_COUNT", cfg.S3FlushCount)
+
 	return cfg
 }
 
@@ -186,6 +203,23 @@ func getStringFlag(cmd *cobra.Command, flag, envVar string, fallback string) str
 	}
 	if env := os.Getenv(envVar); env != "" {
 		return env
+	}
+	return fallback
+}
+
+// getDurationFlag returns the flag value (parsed as duration string) if changed,
+// else the env var if set, else the fallback.
+func getDurationFlag(cmd *cobra.Command, flag, envVar string, fallback time.Duration) time.Duration {
+	if cmd.Flags().Changed(flag) {
+		v, _ := cmd.Flags().GetString(flag)
+		if d, err := time.ParseDuration(v); err == nil {
+			return d
+		}
+	}
+	if env := os.Getenv(envVar); env != "" {
+		if d, err := time.ParseDuration(env); err == nil {
+			return d
+		}
 	}
 	return fallback
 }

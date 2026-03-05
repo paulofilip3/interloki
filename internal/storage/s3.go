@@ -14,8 +14,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/paulofilip3/interloki/internal/models"
 )
@@ -72,8 +72,6 @@ func NewS3Storage(ctx context.Context, cfg S3Config) (*S3Storage, error) {
 		s3Opts = append(s3Opts, func(o *s3.Options) {
 			o.BaseEndpoint = aws.String(cfg.Endpoint)
 			o.UsePathStyle = true
-			// For local dev endpoints that may not have real creds.
-			o.Credentials = credentials.NewStaticCredentialsProvider("minioadmin", "minioadmin", "")
 		})
 	}
 
@@ -124,13 +122,13 @@ func (s *S3Storage) Start(ctx context.Context) error {
 			if full {
 				if err := s.flush(ctx); err != nil {
 					// Log but keep going; best-effort persistence.
-					fmt.Printf("storage: flush error: %v\n", err)
+					log.WithError(err).Warn("storage: flush error")
 				}
 			}
 
 		case <-ticker.C:
 			if err := s.flush(ctx); err != nil {
-				fmt.Printf("storage: flush error: %v\n", err)
+				log.WithError(err).Warn("storage: flush error")
 			}
 
 		case <-ctx.Done():

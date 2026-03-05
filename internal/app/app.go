@@ -12,6 +12,7 @@ import (
 	"github.com/paulofilip3/interloki/internal/processing"
 	"github.com/paulofilip3/interloki/internal/server"
 	"github.com/paulofilip3/interloki/internal/source"
+	"github.com/paulofilip3/interloki/internal/storage"
 )
 
 // App wires all interloki components together: source -> pipeline -> buffer -> server.
@@ -42,34 +43,79 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to create pipeline: %w", err)
 	}
 
-	// 4. Start the source.
+	// 4. Optionally create S3 storage.
+	var store storage.Storage
+	if a.cfg.S3Bucket != "" {
+		s3cfg := storage.S3Config{
+			Bucket:        a.cfg.S3Bucket,
+			Prefix:        a.cfg.S3Prefix,
+			Region:        a.cfg.S3Region,
+			Endpoint:      a.cfg.S3Endpoint,
+			FlushInterval: a.cfg.S3FlushInterval,
+			FlushCount:    a.cfg.S3FlushCount,
+		}
+		s3store, err := storage.NewS3Storage(ctx, s3cfg)
+		if err != nil {
+			return fmt.Errorf("failed to create S3 storage: %w", err)
+		}
+		store = s3store
+		go func() {
+			if err := store.Start(ctx); err != nil {
+				log.WithError(err).Error("S3 storage loop exited with error")
+			}
+		}()
+		log.WithField("bucket", a.cfg.S3Bucket).Info("S3 storage enabled")
+	}
+
+	// 5. Start the source.
 	log.WithField("source", a.src.Name()).Info("starting source")
 	sourceCh, err := a.src.Start(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start source %q: %w", a.src.Name(), err)
 	}
 
-	// 5. Run the pipeline.
+	// 6. Run the pipeline.
 	out, errs := pipe.Run(ctx, sourceCh)
 
-	// 6. Start ConsumeLoop in a goroutine.
+	// 7. Tee pipeline output to both client manager and storage.
+	if store != nil {
+		teedCh := make(chan models.LogMessage, 256)
+		go func() {
+			defer close(teedCh)
+			writerCh := store.Writer()
+			for msg := range out {
+				teedCh <- msg
+				select {
+				case writerCh <- msg:
+				default: // don't block if storage is slow
+				}
+			}
+		}()
+		out = teedCh
+	}
+
+	// 8. Start ConsumeLoop in a goroutine.
 	go manager.ConsumeLoop(ctx, out)
 
-	// 7. Start error drain goroutine.
+	// 9. Start error drain goroutine.
 	go func() {
 		for err := range errs {
 			log.WithError(err).Warn("pipeline error")
 		}
 	}()
 
-	// 8. Create and start HTTP server.
-	srv := server.NewServer(a.cfg.Host, a.cfg.Port, manager)
+	// 10. Create and start HTTP server.
+	var serverOpts []server.ServerOption
+	if store != nil {
+		serverOpts = append(serverOpts, server.WithStorage(store))
+	}
+	srv := server.NewServer(a.cfg.Host, a.cfg.Port, manager, serverOpts...)
 
-	// 9. Print startup message.
+	// 11. Print startup message.
 	addr := fmt.Sprintf("http://%s:%d", a.cfg.Host, a.cfg.Port)
 	fmt.Printf("interloki listening on %s\n", addr)
 	log.WithField("addr", addr).Info("server starting")
 
-	// 10. Block until server returns.
+	// 12. Block until server returns.
 	return srv.Start(ctx)
 }
