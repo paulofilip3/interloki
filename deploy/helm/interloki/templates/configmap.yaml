@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "interloki.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "interloki.labels" . | nindent 4 }}
+data:
+  INTERLOKI_PORT: {{ .Values.service.httpPort | quote }}
+  INTERLOKI_MAX_MESSAGES: {{ .Values.interloki.maxMessages | quote }}
+  INTERLOKI_BULK_WINDOW_MS: {{ .Values.interloki.bulkWindowMs | quote }}
+  INTERLOKI_VERBOSE: {{ .Values.interloki.verbose | quote }}
+  INTERLOKI_S3_BUCKET: {{ .Values.interloki.s3.bucket | quote }}
+  INTERLOKI_S3_PREFIX: {{ .Values.interloki.s3.prefix | quote }}
+  INTERLOKI_S3_REGION: {{ .Values.interloki.s3.region | quote }}
+  INTERLOKI_S3_ENDPOINT: {{ .Values.interloki.s3.endpoint | quote }}
+  INTERLOKI_S3_FLUSH_INTERVAL: {{ .Values.interloki.s3.flushInterval | quote }}
+  INTERLOKI_S3_FLUSH_COUNT: {{ .Values.interloki.s3.flushCount | quote }}
