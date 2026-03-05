@@ -5,6 +5,7 @@ import { useLogsStore } from '../stores/logs'
 const logsStore = useLogsStore()
 const inputEl = ref<HTMLInputElement | null>(null)
 const searchText = ref('')
+const inputFocused = ref(false)
 
 const regexMode = computed(() => logsStore.filterMode === 'regex')
 
@@ -48,14 +49,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="search-bar">
-    <div class="search-bar__icon">&#x1F50D;</div>
+  <div class="search-bar" :class="{ 'search-bar--focused': inputFocused }">
+    <div class="search-bar__icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
     <input
       ref="inputEl"
       v-model="searchText"
       class="search-bar__input"
       placeholder="Filter logs... (Ctrl+F)"
       @keydown.escape="clearSearch"
+      @focus="inputFocused = true"
+      @blur="inputFocused = false"
     />
     <span v-if="filterActive" class="search-bar__count">
       {{ matchCount }} of {{ totalCount }}
@@ -74,19 +79,27 @@ onUnmounted(() => {
 .search-bar {
   display: flex;
   align-items: center;
-  height: 36px;
+  height: 32px;
   padding: 0 8px;
   border-bottom: 1px solid var(--interloki-border);
+  border-left: 2px solid transparent;
   background-color: var(--interloki-bg-secondary);
   font-family: var(--interloki-font-family);
   font-size: var(--interloki-font-size);
   flex-shrink: 0;
   gap: 6px;
+  transition: border-color 0.15s;
+}
+
+.search-bar--focused {
+  border-left-color: var(--interloki-accent);
 }
 
 .search-bar__icon {
   flex-shrink: 0;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  color: var(--interloki-fg-secondary);
   opacity: 0.5;
 }
 
@@ -128,7 +141,7 @@ onUnmounted(() => {
 }
 
 .search-bar__btn:hover {
-  background-color: var(--interloki-border);
+  background-color: var(--interloki-bg-hover);
   color: var(--interloki-fg);
 }
 

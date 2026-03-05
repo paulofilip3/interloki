@@ -48,8 +48,9 @@ const bufferUsage = computed(() => {
     </div>
     <div class="status-bar__divider"></div>
     <div class="status-bar__item">
-      <button @click="connectionStore.toggleFollowing()" class="status-bar__control">
-        {{ connectionStore.following ? '\u23F8' : '\u25B6' }}
+      <button @click="connectionStore.toggleFollowing()" class="status-bar__control" :title="connectionStore.following ? 'Pause' : 'Resume'">
+        <svg v-if="connectionStore.following" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
       </button>
       <button v-if="!connectionStore.following" @click="connectionStore.loadHistory()" class="status-bar__control">
         Load History
@@ -116,6 +117,12 @@ const bufferUsage = computed(() => {
 
 .status-bar__dot--connecting {
   background-color: #eab308;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .status-bar__dot--disconnected {
@@ -128,14 +135,18 @@ const bufferUsage = computed(() => {
   color: var(--interloki-fg-secondary);
   font-family: var(--interloki-font-family);
   font-size: 11px;
-  padding: 1px 8px;
+  padding: 2px 8px;
   border-radius: 3px;
   cursor: pointer;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .status-bar__control:hover {
-  background-color: var(--interloki-border);
+  background-color: var(--interloki-bg-hover);
   color: var(--interloki-fg);
 }
 

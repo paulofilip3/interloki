@@ -5,6 +5,10 @@ import { useSettingsStore } from '../stores/settings'
 import LogRow from './LogRow.vue'
 import type { LogMessage } from '../types'
 
+const props = defineProps<{
+  selectedMessage?: LogMessage | null
+}>()
+
 defineEmits<{
   'row-click': [message: LogMessage]
 }>()
@@ -58,12 +62,15 @@ onMounted(() => {
 <template>
   <div class="log-viewer" ref="container" @scroll="onScroll">
     <div v-if="logsStore.filteredMessages.length === 0" class="log-viewer__empty">
-      Waiting for log messages...
+      <div class="log-viewer__empty-dot"></div>
+      <div class="log-viewer__empty-title">Waiting for log messages...</div>
+      <div class="log-viewer__empty-subtitle">Connect a log source to get started</div>
     </div>
     <LogRow
       v-for="msg in logsStore.filteredMessages"
       :key="msg.id"
       :message="msg"
+      :selected="props.selectedMessage?.id === msg.id"
       @click="$emit('row-click', msg)"
     />
   </div>
@@ -79,11 +86,36 @@ onMounted(() => {
 
 .log-viewer__empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: var(--interloki-fg-secondary);
   font-family: var(--interloki-font-family);
+  gap: 8px;
+}
+
+.log-viewer__empty-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--interloki-fg-secondary);
+  opacity: 0.4;
+  animation: empty-pulse 2s ease-in-out infinite;
+  margin-bottom: 4px;
+}
+
+@keyframes empty-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.log-viewer__empty-title {
   font-size: var(--interloki-font-size);
+}
+
+.log-viewer__empty-subtitle {
+  font-size: 11px;
+  opacity: 0.5;
 }
 </style>

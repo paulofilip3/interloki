@@ -1,0 +1,51 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--interloki-bg);
+  color: var(--interloki-fg);
+  font-family: var(--interloki-font-family);
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--interloki-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--interloki-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--interloki-fg-secondary);
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--interloki-accent);
+  color: white;
+}
+
+/* Theme transition on key elements */
+body,
+.interloki-app,
+.interloki-header,
+.search-bar,
+.status-bar,
+.log-detail,
+.column-config__dropdown {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}

@@ -14,6 +14,10 @@
   --interloki-level-warn: #d97706;
   --interloki-level-error: #dc2626;
   --interloki-level-fatal: #7c2d12;
+  --interloki-bg-hover: #ebebeb;
+  --interloki-bg-active: #e0e7ff;
+  --interloki-shadow: rgba(0, 0, 0, 0.08);
+  --interloki-text-accent: #1d4ed8;
 }
 
 [data-theme="dark"] {
@@ -28,4 +32,8 @@
   --interloki-level-warn: #fbbf24;
   --interloki-level-error: #f87171;
   --interloki-level-fatal: #fb923c;
+  --interloki-bg-hover: #252525;
+  --interloki-bg-active: #1e293b;
+  --interloki-shadow: rgba(0, 0, 0, 0.3);
+  --interloki-text-accent: #93c5fd;
 }

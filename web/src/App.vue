@@ -42,7 +42,7 @@ onMounted(() => {
       </div>
     </header>
     <SearchBar />
-    <LogViewer class="interloki-main" @row-click="onRowClick" />
+    <LogViewer class="interloki-main" :selected-message="selectedMessage" @row-click="onRowClick" />
     <LogDetail :message="selectedMessage" :visible="detailVisible" @close="closeDetail" />
     <StatusBar />
   </div>
@@ -66,7 +66,9 @@ onMounted(() => {
   height: 36px;
   border-bottom: 1px solid var(--interloki-border);
   background-color: var(--interloki-bg-secondary);
+  box-shadow: 0 1px 3px var(--interloki-shadow);
   flex-shrink: 0;
+  z-index: 10;
 }
 
 .interloki-header__title {
@@ -74,6 +76,7 @@ onMounted(() => {
   font-weight: 600;
   margin: 0;
   letter-spacing: 0.5px;
+  color: var(--interloki-accent);
 }
 
 .interloki-header__actions {

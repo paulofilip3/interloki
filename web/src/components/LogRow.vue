@@ -5,6 +5,7 @@ import { useSettingsStore } from '../stores/settings'
 
 const props = defineProps<{
   message: LogMessage
+  selected?: boolean
 }>()
 
 const settings = useSettingsStore()
@@ -34,7 +35,7 @@ const levelClass = computed(() => {
 </script>
 
 <template>
-  <div class="log-row">
+  <div class="log-row" :class="{ 'log-row--selected': selected }">
     <span v-if="settings.showTimestamp" class="log-row__timestamp">{{ formattedTime }}</span>
     <span
       v-if="settings.showLevel && message.level"
@@ -59,6 +60,7 @@ const levelClass = computed(() => {
   cursor: pointer;
   gap: 8px;
   user-select: none;
+  transition: background-color 0.1s;
 }
 
 .log-row:nth-child(even) {
@@ -66,7 +68,15 @@ const levelClass = computed(() => {
 }
 
 .log-row:hover {
-  background-color: var(--interloki-border);
+  background-color: var(--interloki-bg-hover);
+}
+
+.log-row--selected {
+  background-color: var(--interloki-bg-active);
+}
+
+.log-row--selected:nth-child(even) {
+  background-color: var(--interloki-bg-active);
 }
 
 .log-row__timestamp {
@@ -87,22 +97,27 @@ const levelClass = computed(() => {
 
 .log-row__level--debug {
   color: var(--interloki-level-debug);
+  background: rgba(107, 114, 128, 0.1);
 }
 
 .log-row__level--info {
   color: var(--interloki-level-info);
+  background: rgba(37, 99, 235, 0.1);
 }
 
 .log-row__level--warn {
   color: var(--interloki-level-warn);
+  background: rgba(217, 119, 6, 0.1);
 }
 
 .log-row__level--error {
   color: var(--interloki-level-error);
+  background: rgba(220, 38, 38, 0.12);
 }
 
 .log-row__level--fatal {
   color: var(--interloki-level-fatal);
+  background: rgba(124, 45, 18, 0.12);
 }
 
 .log-row__source {

@@ -75,7 +75,7 @@ onUnmounted(() => {
   padding: 6px 0;
   min-width: 140px;
   z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--interloki-shadow);
 }
 
 .column-config__option {
@@ -91,7 +91,7 @@ onUnmounted(() => {
 }
 
 .column-config__option:hover {
-  background-color: var(--interloki-border);
+  background-color: var(--interloki-bg-hover);
 }
 
 .column-config__option input[type="checkbox"] {
