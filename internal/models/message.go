@@ -12,8 +12,9 @@ const (
 	SourceLoki   SourceType = "loki"
 	SourceStdin  SourceType = "stdin"
 	SourceFile   SourceType = "file"
-	SourceSocket SourceType = "socket"
-	SourceDemo   SourceType = "demo"
+	SourceSocket  SourceType = "socket"
+	SourceForward SourceType = "forward"
+	SourceDemo    SourceType = "demo"
 )
 
 // Origin describes where a log message came from.

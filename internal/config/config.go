@@ -11,8 +11,9 @@ type Config struct {
 
 	// Source-specific settings
 	FilePaths  []string // for follow command
-	SocketAddr string   // for socket command (e.g., ":9999")
-	DemoRate   int      // messages per second for demo command
+	SocketAddr  string // for socket command (e.g., ":9999")
+	ForwardAddr string // for forward command (e.g., ":24224")
+	DemoRate    int    // messages per second for demo command
 }
 
 // DefaultConfig returns the default configuration.
@@ -24,8 +25,9 @@ func DefaultConfig() Config {
 		BulkWindowMS: 100,
 		Verbose:      false,
 
-		FilePaths:  nil,
-		SocketAddr: ":9999",
-		DemoRate:   10,
+		FilePaths:   nil,
+		SocketAddr:  ":9999",
+		ForwardAddr: ":24224",
+		DemoRate:    10,
 	}
 }

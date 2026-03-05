@@ -83,6 +83,28 @@ var socketCmd = &cobra.Command{
 	},
 }
 
+var forwardCmd = &cobra.Command{
+	Use:   "forward",
+	Short: "Accept logs from Fluent Bit via Forward protocol",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := configFromFlags(cmd)
+
+		addr := getStringFlag(cmd, "listen", "INTERLOKI_FORWARD_LISTEN", cfg.ForwardAddr)
+		cfg.ForwardAddr = addr
+
+		src := source.NewForwardSource(addr)
+
+		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer cancel()
+
+		application, err := app.New(cfg, src)
+		if err != nil {
+			return err
+		}
+		return application.Run(ctx)
+	},
+}
+
 var demoCmd = &cobra.Command{
 	Use:   "demo",
 	Short: "Generate fake log messages for demonstration",
@@ -120,10 +142,13 @@ func init() {
 	// socket command flags.
 	socketCmd.Flags().String("listen", ":9999", "TCP address to listen on")
 
+	// forward command flags.
+	forwardCmd.Flags().String("listen", ":24224", "TCP address to listen on for Forward protocol")
+
 	// demo command flags.
 	demoCmd.Flags().Int("rate", 10, "Messages per second")
 
-	rootCmd.AddCommand(stdinCmd, followCmd, socketCmd, demoCmd)
+	rootCmd.AddCommand(stdinCmd, followCmd, socketCmd, forwardCmd, demoCmd)
 }
 
 // configFromFlags builds a Config from cobra command flags with env var fallback.
