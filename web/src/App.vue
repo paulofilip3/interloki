@@ -6,6 +6,7 @@ import SearchBar from './components/SearchBar.vue'
 import ColumnConfig from './components/ColumnConfig.vue'
 import StatusBar from './components/StatusBar.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
+import PaletteToggle from './components/PaletteToggle.vue'
 import { useWebSocket } from './composables/useWebSocket'
 import { useTheme } from './composables/useTheme'
 import type { LogMessage } from './types'
@@ -39,6 +40,7 @@ onMounted(() => {
       <h1 class="interloki-header__title">interloki</h1>
       <div class="interloki-header__actions">
         <ColumnConfig />
+        <PaletteToggle />
         <ThemeToggle />
       </div>
     </header>

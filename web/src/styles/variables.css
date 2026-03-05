@@ -37,3 +37,45 @@
   --interloki-shadow: rgba(0, 0, 0, 0.3);
   --interloki-text-accent: #93c5fd;
 }
+
+[data-theme="catppuccin-latte"] {
+  --interloki-bg: #eff1f5;
+  --interloki-bg-secondary: #e6e9ef;
+  --interloki-fg: #4c4f69;
+  --interloki-fg-secondary: #6c6f85;
+  --interloki-accent: #1e66f5;
+  --interloki-border: #ccd0da;
+  --interloki-font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --interloki-font-size: 13px;
+  --interloki-row-height: 24px;
+  --interloki-level-debug: #9ca0b0;
+  --interloki-level-info: #1e66f5;
+  --interloki-level-warn: #df8e1d;
+  --interloki-level-error: #d20f39;
+  --interloki-level-fatal: #fe640b;
+  --interloki-bg-hover: #ccd0da;
+  --interloki-bg-active: #bcc0cc;
+  --interloki-shadow: rgba(76, 79, 105, 0.1);
+  --interloki-text-accent: #7287fd;
+}
+
+[data-theme="catppuccin-mocha"] {
+  --interloki-bg: #1e1e2e;
+  --interloki-bg-secondary: #181825;
+  --interloki-fg: #cdd6f4;
+  --interloki-fg-secondary: #a6adc8;
+  --interloki-accent: #89b4fa;
+  --interloki-border: #313244;
+  --interloki-font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --interloki-font-size: 13px;
+  --interloki-row-height: 24px;
+  --interloki-level-debug: #6c7086;
+  --interloki-level-info: #89b4fa;
+  --interloki-level-warn: #f9e2af;
+  --interloki-level-error: #f38ba8;
+  --interloki-level-fatal: #fab387;
+  --interloki-bg-hover: #313244;
+  --interloki-bg-active: #45475a;
+  --interloki-shadow: rgba(0, 0, 0, 0.4);
+  --interloki-text-accent: #b4befe;
+}

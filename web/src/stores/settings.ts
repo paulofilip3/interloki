@@ -5,6 +5,7 @@ const STORAGE_KEY = 'interloki-settings'
 
 interface SettingsState {
   theme: 'light' | 'dark'
+  palette: 'default' | 'catppuccin'
   autoFollow: boolean
   showTimestamp: boolean
   showLevel: boolean
@@ -33,6 +34,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const saved = loadFromStorage()
 
   const theme = ref<'light' | 'dark'>(saved.theme ?? 'dark')
+  const palette = ref<'default' | 'catppuccin'>(saved.palette ?? 'default')
   const autoFollow = ref(saved.autoFollow ?? true)
   const showTimestamp = ref(saved.showTimestamp ?? true)
   const showLevel = ref(saved.showLevel ?? true)
@@ -41,6 +43,7 @@ export const useSettingsStore = defineStore('settings', () => {
   function persist() {
     saveToStorage({
       theme: theme.value,
+      palette: palette.value,
       autoFollow: autoFollow.value,
       showTimestamp: showTimestamp.value,
       showLevel: showLevel.value,
@@ -48,10 +51,14 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
-  watch([theme, autoFollow, showTimestamp, showLevel, showSource], persist)
+  watch([theme, palette, autoFollow, showTimestamp, showLevel, showSource], persist)
 
   function toggleTheme() {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  }
+
+  function togglePalette() {
+    palette.value = palette.value === 'default' ? 'catppuccin' : 'default'
   }
 
   function setAutoFollow(val: boolean) {
@@ -72,11 +79,13 @@ export const useSettingsStore = defineStore('settings', () => {
 
   return {
     theme,
+    palette,
     autoFollow,
     showTimestamp,
     showLevel,
     showSource,
     toggleTheme,
+    togglePalette,
     setAutoFollow,
     setShowTimestamp,
     setShowLevel,
