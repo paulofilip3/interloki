@@ -6,9 +6,20 @@ export const useLogsStore = defineStore('logs', () => {
   const messages = ref<LogMessage[]>([])
   const maxMessages = ref(10000)
   const filter = ref('')
+  const filterMode = ref<'text' | 'regex'>('text')
 
   const filteredMessages = computed(() => {
     if (!filter.value) return messages.value
+
+    if (filterMode.value === 'regex') {
+      try {
+        const re = new RegExp(filter.value, 'i')
+        return messages.value.filter((msg) => re.test(msg.content))
+      } catch {
+        return messages.value // invalid regex, show all
+      }
+    }
+
     const term = filter.value.toLowerCase()
     return messages.value.filter((msg) =>
       msg.content.toLowerCase().includes(term),
@@ -30,13 +41,19 @@ export const useLogsStore = defineStore('logs', () => {
     filter.value = text
   }
 
+  function setFilterMode(mode: 'text' | 'regex') {
+    filterMode.value = mode
+  }
+
   return {
     messages,
     maxMessages,
     filter,
+    filterMode,
     filteredMessages,
     addMessages,
     clear,
     setFilter,
+    setFilterMode,
   }
 })
