@@ -1,0 +1,31 @@
+:root,
+[data-theme="light"] {
+  --interloki-bg: #ffffff;
+  --interloki-bg-secondary: #f5f5f5;
+  --interloki-fg: #1a1a1a;
+  --interloki-fg-secondary: #666666;
+  --interloki-accent: #2563eb;
+  --interloki-border: #e5e5e5;
+  --interloki-font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --interloki-font-size: 13px;
+  --interloki-row-height: 24px;
+  --interloki-level-debug: #6b7280;
+  --interloki-level-info: #2563eb;
+  --interloki-level-warn: #d97706;
+  --interloki-level-error: #dc2626;
+  --interloki-level-fatal: #7c2d12;
+}
+
+[data-theme="dark"] {
+  --interloki-bg: #0f0f0f;
+  --interloki-bg-secondary: #1a1a1a;
+  --interloki-fg: #e5e5e5;
+  --interloki-fg-secondary: #999999;
+  --interloki-accent: #3b82f6;
+  --interloki-border: #333333;
+  --interloki-level-debug: #9ca3af;
+  --interloki-level-info: #60a5fa;
+  --interloki-level-warn: #fbbf24;
+  --interloki-level-error: #f87171;
+  --interloki-level-fatal: #fb923c;
+}
