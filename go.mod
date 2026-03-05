@@ -9,3 +9,5 @@ require (
 	github.com/paulofilip3/pipeline v1.0.0
 	github.com/valyala/fastjson v1.6.10
 )
+
+require github.com/gorilla/websocket v1.5.3 // indirect
