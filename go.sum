@@ -1,0 +1,6 @@
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/paulofilip3/pipeline v1.0.0 h1:mCB7UHwVoq7CK9KPwPenS6F1xsjAvO8dQff3k8OEbLg=
+github.com/paulofilip3/pipeline v1.0.0/go.mod h1:3tE1VercQawlynoqXyug8M+Dg5NuoUF4dQxH3ehEdZ0=
+github.com/valyala/fastjson v1.6.10 h1:/yjJg8jaVQdYR3arGxPE2X5z89xrlhS0eGXdv+ADTh4=
+github.com/valyala/fastjson v1.6.10/go.mod h1:e6FubmQouUNP73jtMLmcbxS6ydWIpOfhz34TSfO3JaE=
