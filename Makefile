@@ -1,20 +1,31 @@
-.PHONY: build build-frontend build-backend dev clean lint
+BINARY_NAME := interloki
+BUILD_DIR   := bin
+FRONTEND_DIST := web/dist
+EMBED_DIST  := internal/server/dist
+
+.PHONY: build build-frontend build-backend dev clean lint test
 
 build: build-frontend build-backend
 
 build-frontend:
 	cd web && npm run build
+	rm -rf $(EMBED_DIST)
+	cp -r $(FRONTEND_DIST) $(EMBED_DIST)
 
 build-backend:
-	go build -o interloki ./cmd/interloki
+	GOROOT=/usr/lib/go-1.24 go build -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/interloki
 
 dev:
-	go run ./cmd/interloki
+	GOROOT=/usr/lib/go-1.24 go run ./cmd/interloki
+
+test:
+	GOROOT=/usr/lib/go-1.24 go test ./internal/...
 
 clean:
-	rm -f interloki
-	rm -rf web/dist
+	rm -rf $(BUILD_DIR)
+	rm -rf $(FRONTEND_DIST)
+	rm -rf $(EMBED_DIST)
 
 lint:
-	go vet ./...
+	GOROOT=/usr/lib/go-1.24 go vet ./...
 	golangci-lint run ./...

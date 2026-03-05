@@ -93,11 +93,11 @@ func TestRootEndpoint(t *testing.T) {
 		t.Fatalf("expected 200, got %d", resp.StatusCode)
 	}
 
-	buf := make([]byte, 64)
+	buf := make([]byte, 512)
 	n, _ := resp.Body.Read(buf)
 	body := string(buf[:n])
-	if body != "interloki" {
-		t.Errorf("expected body 'interloki', got %q", body)
+	if !strings.Contains(body, "Interloki") {
+		t.Errorf("expected body to contain 'Interloki', got %q", body)
 	}
 }
 

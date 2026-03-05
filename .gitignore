@@ -1,5 +1,5 @@
 # Go
-/interloki
+/bin/
 *.exe
 *.exe~
 *.dll
@@ -12,6 +12,10 @@ vendor/
 # Web / Node
 web/node_modules/
 web/dist/
+
+# Embedded frontend (build artifact copied from web/dist)
+internal/server/dist/*
+!internal/server/dist/index.html
 
 # Environment
 .env

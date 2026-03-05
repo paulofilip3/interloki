@@ -18,16 +18,7 @@ type Server struct {
 func NewServer(host string, port int, manager *ClientManager) *Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		// Will serve embedded frontend later; for now return a simple text
-		// response.
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "interloki")
-	})
+	mux.Handle("GET /", FrontendHandler())
 
 	mux.HandleFunc("GET /ws", manager.HandleWS)
 	mux.HandleFunc("GET /api/status", manager.HandleStatus)
