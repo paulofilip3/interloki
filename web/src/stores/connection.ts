@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { StatusData, LogMessage } from '../types'
-import { useLogsStore } from './logs'
+import { useLogsStore, WINDOW_SIZE } from './logs'
 
 export const useConnectionStore = defineStore('connection', () => {
   const status = ref<'connecting' | 'connected' | 'disconnected'>('disconnected')
@@ -45,12 +45,43 @@ export const useConnectionStore = defineStore('connection', () => {
     }
   }
 
-  async function loadHistory() {
-    const res = await fetch(`/api/client/load?start=0&count=${bufferSize.value}`)
-    const data = await res.json() as { messages: LogMessage[]; total: number }
+  async function loadInitialHistory() {
     const logsStore = useLogsStore()
-    logsStore.clear()
-    logsStore.addMessages(data.messages)
+    try {
+      const statusRes = await fetch('/api/status')
+      const statusData = await statusRes.json()
+      const bufUsed = statusData.buffer_used as number
+      if (bufUsed === 0) return
+
+      const count = Math.min(bufUsed, WINDOW_SIZE)
+      const start = bufUsed - count
+
+      const res = await fetch(`/api/client/load?start=${start}&count=${count}`)
+      const data = await res.json() as { messages: LogMessage[]; total: number }
+      logsStore.setInitialMessages(data.messages, start)
+    } catch {
+      // WS stream will provide messages as fallback
+    }
+  }
+
+  async function loadMoreHistory() {
+    const logsStore = useLogsStore()
+    if (logsStore.isLoadingHistory || !logsStore.canLoadMore) return
+
+    logsStore.isLoadingHistory = true
+    try {
+      const start = Math.max(0, logsStore.oldestLoadedIndex - WINDOW_SIZE)
+      const count = logsStore.oldestLoadedIndex - start
+      if (count <= 0) return
+
+      const res = await fetch(`/api/client/load?start=${start}&count=${count}`)
+      const data = await res.json() as { messages: LogMessage[]; total: number }
+      logsStore.prependHistory(data.messages, start)
+    } catch {
+      // ignore
+    } finally {
+      logsStore.isLoadingHistory = false
+    }
   }
 
   return {
@@ -65,6 +96,7 @@ export const useConnectionStore = defineStore('connection', () => {
     setFollowing,
     registerControls,
     toggleFollowing,
-    loadHistory,
+    loadInitialHistory,
+    loadMoreHistory,
   }
 })

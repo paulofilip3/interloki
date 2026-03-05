@@ -2,11 +2,8 @@
 import { computed } from 'vue'
 import { useConnectionStore } from '../stores/connection'
 import { useLogsStore } from '../stores/logs'
-import { useSettingsStore } from '../stores/settings'
-
 const connectionStore = useConnectionStore()
 const logsStore = useLogsStore()
-const settings = useSettingsStore()
 
 const statusLabel = computed(() => {
   switch (connectionStore.status) {
@@ -52,16 +49,10 @@ const bufferUsage = computed(() => {
         <svg v-if="connectionStore.following" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
         <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
       </button>
-      <button v-if="!connectionStore.following" @click="connectionStore.loadHistory()" class="status-bar__control">
-        Load History
-      </button>
     </div>
     <div class="status-bar__spacer"></div>
     <div v-if="!connectionStore.following" class="status-bar__item status-bar__item--subtle status-bar__item--paused">
       PAUSED
-    </div>
-    <div v-if="settings.autoFollow" class="status-bar__item status-bar__item--subtle">
-      AUTO-FOLLOW
     </div>
   </div>
 </template>

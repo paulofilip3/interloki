@@ -2,11 +2,17 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { LogMessage } from '../types'
 
+export const WINDOW_SIZE = 500
+const MAX_MESSAGES = 5000
+
 export const useLogsStore = defineStore('logs', () => {
   const messages = ref<LogMessage[]>([])
-  const maxMessages = ref(10000)
   const filter = ref('')
   const filterMode = ref<'text' | 'regex'>('text')
+  const oldestLoadedIndex = ref(0)
+  const isLoadingHistory = ref(false)
+
+  const canLoadMore = computed(() => oldestLoadedIndex.value > 0)
 
   const filteredMessages = computed(() => {
     if (!filter.value) return messages.value
@@ -16,7 +22,7 @@ export const useLogsStore = defineStore('logs', () => {
         const re = new RegExp(filter.value, 'i')
         return messages.value.filter((msg) => re.test(msg.content))
       } catch {
-        return messages.value // invalid regex, show all
+        return messages.value
       }
     }
 
@@ -27,14 +33,43 @@ export const useLogsStore = defineStore('logs', () => {
   })
 
   function addMessages(msgs: LogMessage[]) {
-    messages.value.push(...msgs)
-    if (messages.value.length > maxMessages.value) {
-      messages.value = messages.value.slice(-maxMessages.value)
+    const tail = messages.value.slice(-200)
+    const existingIds = new Set(tail.map(m => m.id))
+    const newMsgs = msgs.filter(m => !existingIds.has(m.id))
+    if (newMsgs.length === 0) return
+
+    messages.value.push(...newMsgs)
+
+    if (messages.value.length > MAX_MESSAGES) {
+      const excess = messages.value.length - MAX_MESSAGES
+      messages.value = messages.value.slice(excess)
+      oldestLoadedIndex.value += excess
     }
+  }
+
+  function trimToWindow() {
+    if (messages.value.length > WINDOW_SIZE) {
+      const excess = messages.value.length - WINDOW_SIZE
+      messages.value = messages.value.slice(excess)
+      oldestLoadedIndex.value += excess
+    }
+  }
+
+  function prependHistory(msgs: LogMessage[], newOldestIndex: number) {
+    messages.value = [...msgs, ...messages.value]
+    oldestLoadedIndex.value = newOldestIndex
+  }
+
+  function setInitialMessages(msgs: LogMessage[], startIndex: number) {
+    const historyIds = new Set(msgs.map(m => m.id))
+    const wsOnly = messages.value.filter(m => !historyIds.has(m.id))
+    messages.value = [...msgs, ...wsOnly]
+    oldestLoadedIndex.value = startIndex
   }
 
   function clear() {
     messages.value = []
+    oldestLoadedIndex.value = 0
   }
 
   function setFilter(text: string) {
@@ -47,11 +82,16 @@ export const useLogsStore = defineStore('logs', () => {
 
   return {
     messages,
-    maxMessages,
     filter,
     filterMode,
     filteredMessages,
+    oldestLoadedIndex,
+    isLoadingHistory,
+    canLoadMore,
     addMessages,
+    trimToWindow,
+    prependHistory,
+    setInitialMessages,
     clear,
     setFilter,
     setFilterMode,

@@ -51,6 +51,7 @@ export function useWebSocket(url: string) {
       case 'client_joined': {
         const data = msg.data as ClientJoinedData
         connectionStore.setConnected(data.client_id, data.buffer_size)
+        connectionStore.loadInitialHistory()
         break
       }
       case 'log_bulk': {
