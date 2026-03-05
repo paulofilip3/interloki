@@ -6,7 +6,10 @@
 
 Real-time log viewer and explorer: pipe any log stream into a browser-based UI over WebSocket, with search, JSON highlighting, and optional S3 persistence.
 
-<!-- TODO: Add screenshot -->
+| Light | Dark |
+|-------|------|
+| ![Light theme](screenshots/light.png) | ![Dark theme](screenshots/dark.png) |
+| ![Catppuccin Latte](screenshots/catppuccin-latte.png) | ![Catppuccin Mocha](screenshots/catppuccin-mocha.png) |
 
 ## Features
 
@@ -17,11 +20,18 @@ Real-time log viewer and explorer: pipe any log stream into a browser-based UI o
 - **Search and filter** — text substring or regex filter applied client-side in real time
 - **JSON detection and highlighting** — structured log records are parsed and rendered as a collapsible JSON tree
 - **Column configuration** — show/hide and reorder displayed fields
-- **Light/dark themes** — switchable via the UI, driven by CSS custom properties
+- **Four themes** — Default Light, Default Dark, Catppuccin Latte, and Catppuccin Mocha; base (light/dark) and palette (Default/Catppuccin) toggled independently via the UI
 - **Auto-follow with pause/resume** — follows the tail automatically; scrolling up pauses, clicking the button or scrolling to the bottom resumes
 - **Expandable log detail panel** — click any row for the full record, raw content, and all extracted fields
 - **Kubernetes native** — designed for per-namespace Fluent Bit sidecar deployment with the included Helm chart
 - **Single binary** — frontend assets embedded via `go:embed`; deploy one file
+
+## Inspiration
+
+interloki was inspired by two projects:
+
+- **[logdy](https://github.com/logdyhq/logdy-core)** — the single-binary, embedded-frontend, WebSocket-streaming architecture is directly modelled on logdy-core. If you want a more mature tool in the same space, check it out.
+- **[Grafana Loki](https://grafana.com/oss/loki/)** — the label-based log aggregation concept and the project name. interloki is *not* a Loki datasource; it is a lightweight alternative for teams that do not run a full Loki stack.
 
 ## Quick Start
 
@@ -39,7 +49,7 @@ Open `http://localhost:8080` in a browser.
 ### Docker
 
 ```bash
-docker run --rm -p 8080:8080 ghcr.io/paulofilip3/interloki demo --rate=50
+docker run --rm -p 8080:8080 paulofilip3/interloki demo --rate=50
 ```
 
 ## Source Modes
@@ -193,7 +203,7 @@ Key values from `values.yaml`:
 
 ```yaml
 image:
-  repository: ghcr.io/paulofilip3/interloki
+  repository: paulofilip3/interloki
   tag: ""           # defaults to chart appVersion
 
 service:
