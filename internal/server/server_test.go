@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -302,6 +303,86 @@ func TestPingPong(t *testing.T) {
 	msg := readWSMessage(t, conn, 2*time.Second)
 	if msg.Type != "pong" {
 		t.Errorf("expected type 'pong', got %q", msg.Type)
+	}
+}
+
+func TestLoadRangeEndpoint(t *testing.T) {
+	mgr := newTestManager(1000)
+	ts := newTestHTTPServer(t, mgr)
+	defer ts.Close()
+
+	// Pre-fill the ring buffer with 10 messages.
+	for i := 0; i < 10; i++ {
+		mgr.ring.Push(models.LogMessage{
+			ID:      fmt.Sprintf("msg-%d", i),
+			Content: fmt.Sprintf("message %d", i),
+			Source:  models.SourceStdin,
+		})
+	}
+
+	resp, err := http.Get(ts.URL + "/api/client/load?start=0&count=5")
+	if err != nil {
+		t.Fatalf("GET /api/client/load: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Messages []models.LogMessage `json:"messages"`
+		Total    uint64              `json:"total"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	if len(result.Messages) != 5 {
+		t.Fatalf("expected 5 messages, got %d", len(result.Messages))
+	}
+	if result.Messages[0].ID != "msg-0" {
+		t.Errorf("expected first message ID 'msg-0', got %q", result.Messages[0].ID)
+	}
+	if result.Messages[4].ID != "msg-4" {
+		t.Errorf("expected last message ID 'msg-4', got %q", result.Messages[4].ID)
+	}
+}
+
+func TestLoadRangeEndpointDefaults(t *testing.T) {
+	mgr := newTestManager(1000)
+	ts := newTestHTTPServer(t, mgr)
+	defer ts.Close()
+
+	// Pre-fill with 3 messages.
+	for i := 0; i < 3; i++ {
+		mgr.ring.Push(models.LogMessage{
+			ID:      fmt.Sprintf("def-%d", i),
+			Content: fmt.Sprintf("default message %d", i),
+			Source:  models.SourceStdin,
+		})
+	}
+
+	// Call without params — defaults should work (start=0, count=100).
+	resp, err := http.Get(ts.URL + "/api/client/load")
+	if err != nil {
+		t.Fatalf("GET /api/client/load: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Messages []models.LogMessage `json:"messages"`
+		Total    uint64              `json:"total"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	// Should return all 3 messages since count defaults to 100.
+	if len(result.Messages) != 3 {
+		t.Fatalf("expected 3 messages with default params, got %d", len(result.Messages))
 	}
 }
 

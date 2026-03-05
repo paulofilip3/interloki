@@ -46,7 +46,19 @@ const bufferUsage = computed(() => {
     <div v-if="bufferUsage" class="status-bar__item">
       <span>Buffer: {{ bufferUsage }}</span>
     </div>
+    <div class="status-bar__divider"></div>
+    <div class="status-bar__item">
+      <button @click="connectionStore.toggleFollowing()" class="status-bar__control">
+        {{ connectionStore.following ? '\u23F8' : '\u25B6' }}
+      </button>
+      <button v-if="!connectionStore.following" @click="connectionStore.loadHistory()" class="status-bar__control">
+        Load History
+      </button>
+    </div>
     <div class="status-bar__spacer"></div>
+    <div v-if="!connectionStore.following" class="status-bar__item status-bar__item--subtle status-bar__item--paused">
+      PAUSED
+    </div>
     <div v-if="settings.autoFollow" class="status-bar__item status-bar__item--subtle">
       AUTO-FOLLOW
     </div>
@@ -108,5 +120,26 @@ const bufferUsage = computed(() => {
 
 .status-bar__dot--disconnected {
   background-color: #ef4444;
+}
+
+.status-bar__control {
+  background: none;
+  border: 1px solid var(--interloki-border);
+  color: var(--interloki-fg-secondary);
+  font-family: var(--interloki-font-family);
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.status-bar__control:hover {
+  background-color: var(--interloki-border);
+  color: var(--interloki-fg);
+}
+
+.status-bar__item--paused {
+  color: #eab308;
 }
 </style>

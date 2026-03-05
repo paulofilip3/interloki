@@ -22,6 +22,7 @@ func NewServer(host string, port int, manager *ClientManager) *Server {
 
 	mux.HandleFunc("GET /ws", manager.HandleWS)
 	mux.HandleFunc("GET /api/status", manager.HandleStatus)
+	mux.HandleFunc("GET /api/client/load", manager.HandleLoadRange)
 
 	return &Server{
 		httpServer: &http.Server{

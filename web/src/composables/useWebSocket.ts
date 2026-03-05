@@ -95,6 +95,18 @@ export function useWebSocket(url: string) {
     }
   }
 
+  function pause() {
+    send({ type: 'set_status', data: { status: 'stopped' } })
+    connectionStore.setFollowing(false)
+  }
+
+  function resume() {
+    send({ type: 'set_status', data: { status: 'following' } })
+    connectionStore.setFollowing(true)
+  }
+
+  connectionStore.registerControls(pause, resume)
+
   onUnmounted(() => {
     disconnect()
   })
@@ -103,6 +115,8 @@ export function useWebSocket(url: string) {
     connect,
     disconnect,
     send,
+    pause,
+    resume,
     isConnected,
   }
 }
